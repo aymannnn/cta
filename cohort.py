@@ -3,6 +3,7 @@ class Cohort():
     initial setup, define patient base case scenarios
     '''
     def get_counters(self):
+        # have a strategy string for printing
         counters = {
             'ct.scan': 0
         }
@@ -13,17 +14,41 @@ class Cohort():
             'initial': 1.0,
             'true.bcvi': 0.0,
             'false.bcvi': 0.0,
+
             # subset of true bcvi
             # actually easier to label with TP, FP, etc. 
             'TP': 0.0,
             'FN': 0.0,
+
             # subset of false bcvi
             'FP': 0.0,
             'TN': 0.0,
+
             # after screening test
             'detected.bcvi': 0.0,
             'missed.bcvi': 0.0,
-            'no.bcvi': 0.0
+            'no.bcvi': 0.0,
+
+            ## ONLY "need" to print these last states
+            ## in the output tables, but can go ahead
+            ## and print all
+
+            # stroke states/mortality
+            # need to stratify by state of BCVI
+            'stroke.bcvi.caught': 0.0,
+            'stroke.bcvi.missed': 0.0,
+            'stroke.no.bcvi': 0.0,
+
+            ## mortality and follow-up
+            'regular.trauma.fu.bcvi.caught': 0.0,
+            'regular.trauma.fu.bcvi.missed': 0.0,
+            'regular.trauma.fu.no.bcvi': 0.0,
+            
+            ## mortality
+            'dead.bcvi.caught': 0.0,
+            'dead.bcvi.missed': 0.0,
+            'dead.no.bcvi': 0.0,
+
         }
         return states
 
@@ -47,3 +72,4 @@ class Cohort():
         self.strategy = s_strategy
         self.counters = self.get_counters()
         self.states = self.get_state_matrix()
+        self.initial_event_ran = False

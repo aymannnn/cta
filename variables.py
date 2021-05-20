@@ -1,3 +1,12 @@
+def adjust_for_relative_risk(rr, prob):
+
+        # prob to odds
+    odds = prob/(1-prob)
+    scaled = odds*rr
+    # odds to prob
+    adjusted_prob = scaled / (1+scaled)
+    return adjusted_prob
+
 class Variable():
     '''
     initial setup, always define a function to generate lower,
@@ -15,7 +24,9 @@ class Variable():
     def get_upper_bound(self):
         return self.upper
 
-    def __init__(self, base, x = None, n = None):
+    def __init__(
+        self, base, x = None, n = None, distribution = None):
+        
         self.lower = None
         self.upper = None
         self.distribution = None
@@ -52,16 +63,22 @@ def get_input_variables():
         ## stroke with and without thrombotic therapy
         'stroke.bcvi.no.therapy': Variable(0.3360),
         'stroke.bcvi.therapy': Variable(0.0980),
+        ## TODO: come back and fix this value with the one that
+        ## youssef got
         'stroke.no.bcvi': Variable(0.017), ## black in an email
 
         ## mortality with and without thrombotic therapy
+        ## relative risk of mortality with stroke
+        'RR.mortality.stroke': Variable(1.75),
         'mortality.bcvi.no.therapy': Variable(0.4030),
-        'mortality.bcvi.therapy': Variable(0.1660)
+        'mortality.bcvi.therapy': Variable(0.1660),
+        'mortality.blunt.overall': Variable(0.1610)
         ## hemorrhage? complications?
         
         ## costs?
 
     }
     return variables
-    
+
+
 
