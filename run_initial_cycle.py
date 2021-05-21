@@ -32,7 +32,7 @@ def get_sens_spec(strategy, variables):
         return sens, spec
     return sens, spec
 
-def count_ctas_and_move_states(cohort):
+def count_ctas_and_move_states(cohort, input_variables):
     # note that this is only defined for patients that are NOT in the 
     # universal screening strategy
     assert(cohort.strategy != 'universal')
@@ -40,9 +40,12 @@ def count_ctas_and_move_states(cohort):
     # add the number of ct scans
     cohort.counters['ct.scan'] += cohort.states['TP']
     cohort.counters['ct.scan'] += cohort.states['FP']
+    
+    cohort.counters['cost.cta'] += (
+        cohort.counters['ct.scan']*
+        input_variables['cost.cta'].val)
 
     # move states
-
     cohort.states = gf.move_state(
         cohort.states,
         'TP',
@@ -73,7 +76,7 @@ def count_ctas_and_move_states(cohort):
     )
     return cohort
 
-def universal_cta(cohort):
+def universal_cta(cohort, input_variables):
     assert(cohort.strategy == 'universal')
     cohort.states = gf.move_state(
         cohort.states,
@@ -92,6 +95,9 @@ def universal_cta(cohort):
     # count the CTAs
     cohort.counters['ct.scan'] += cohort.states['detected.bcvi']
     cohort.counters['ct.scan'] += cohort.states['no.bcvi']
+    cohort.counters['cost.cta'] += (
+        cohort.counters['ct.scan']*input_variables['cost.cta'].val)
+
     return cohort
         
 
@@ -126,7 +132,8 @@ def screening_test(cohort, input_variables):
     )
 
     # count the number of CTAs
-    cohort = count_ctas_and_move_states(cohort)
+    cohort = count_ctas_and_move_states(cohort, input_variables)
+
     return cohort
 
 def run_screen_and_cta(cohort, input_variables):
@@ -134,9 +141,13 @@ def run_screen_and_cta(cohort, input_variables):
     # universal is different obviously since sens and spec doesn't make as much
     # sense and will break the CTA and move function
     if cohort.strategy == 'universal':
-        cohort = universal_cta(cohort)
+        cohort = universal_cta(cohort, input_variables)
     else:
         cohort = screening_test(cohort, input_variables)
+ 
+    # add in the cost of aspirin management now that we've 
+    cohort.counters['cost.aspirin'] += (
+        input_variables['cost.aspirin'].val * cohort.states['detected.bcvi'] )
     return cohort
 
 def stroke(cohort, input_variables):
@@ -153,6 +164,8 @@ def stroke(cohort, input_variables):
         probs
     )
 
+    cohort.counters['cost.stroke.caught'] += (
+        cohort.states['stroke.bcvi.caught'] * input_variables['cost.stroke'].val)
     # starting with missed bcvi
     start_state = 'missed.bcvi'
     end_states = ['stroke.bcvi.missed', 'regular.trauma.fu.bcvi.missed']
@@ -164,6 +177,9 @@ def stroke(cohort, input_variables):
         end_states,
         probs
     )
+
+    cohort.counters['cost.stroke.missed'] += (
+        cohort.states['stroke.bcvi.missed'] * input_variables['cost.stroke'].val)
 
     # starting with baseline risk of stroke, should be close to 1% but
     # black in a email said 1, and youssif found 11.5%
@@ -178,6 +194,9 @@ def stroke(cohort, input_variables):
         end_states,
         probs
     )
+
+    cohort.counters['cost.stroke.baseline'] += (
+        cohort.states['stroke.no.bcvi'] * input_variables['cost.stroke'].val)
 
     return cohort
 
@@ -272,7 +291,41 @@ def initial_mortality(cohort, input_variables):
 
     return cohort
 
+def add_quality_of_life(cohort, input_variables):
+    ## really only need to add in two different quality of lifes:
+    ## 1 is regular trauma 
+    ## and 2 is stroke
+    ## at this point, patients that had a stroke AND died during the acute
+    ## event are assumed to have a life expectancy of 0, and thus no QALY gain
+    
+    counters = cohort.counters
+    states = cohort.states
+    cycle = 1/12
+    qaly_trauma = input_variables['utility.trauma.acute'].val
+    qaly_stroke = input_variables['utility.stroke.acute'].val
+
+    qaly_stroke_all = cycle*qaly_stroke*qaly_trauma
+    qaly_trauma_all = cycle*qaly_trauma
+
+    counters['QALY.post.stroke'] += qaly_stroke_all*states['stroke.bcvi.caught']
+    counters['QALY.post.stroke'] += qaly_stroke_all*states['stroke.bcvi.missed']
+    counters['QALY.post.stroke'] += qaly_stroke_all*states['stroke.no.bcvi']
+    
+    counters['QALY.post.trauma'] += (
+        qaly_trauma_all*states['regular.trauma.fu.bcvi.caught'])
+    counters['QALY.post.trauma'] += (
+        qaly_trauma_all*states['regular.trauma.fu.bcvi.missed'])
+    counters['QALY.post.trauma'] += (
+        qaly_trauma_all*states['regular.trauma.fu.no.bcvi'])
+
+    cohort.counters = counters
+
+    return cohort
+
 def run_initial_event(cohort, input_variables):
+
+    # everyone has the cost of trauma
+    cohort.counters['cost.trauma'] = 1*input_variables['cost.blunt.base'].val
 
     # split into true state bcvi or false.bcvi
     cohort = split_initial_states(cohort, input_variables)
@@ -284,6 +337,8 @@ def run_initial_event(cohort, input_variables):
     cohort = stroke(cohort, input_variables)
     cohort = initial_mortality(cohort, input_variables)
     
+    cohort = add_quality_of_life(cohort, input_variables)
+
     cohort.initial_event_ran = True
 
     return cohort

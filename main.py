@@ -31,19 +31,12 @@ def setup_model():
         'edc': None,
         'mc': None
     }
-
     for key in strategies:
         print('Running strategy:', key)
-        strategies[key] = run_strategy(key, input_variables)
-        print(key, 
-        strategies[key].counters, 
-        strategies[key].states,
-        strategies[key].check_state_sum())
-    
+        strategies[key] = run_strategy(key, input_variables)    
     print_output.print_base_case(strategies)
 
     return 
 
 if __name__ == "__main__":
     setup_model()
-

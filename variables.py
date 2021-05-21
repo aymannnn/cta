@@ -1,10 +1,23 @@
-def adjust_for_relative_risk(rr, prob):
-
-        # prob to odds
+def probability_to_odds(prob):
     odds = prob/(1-prob)
+    return odds
+
+def odds_to_probability(odds):
+    prob = odds/(1+odds)
+    return prob
+
+def annual_prob_to_monthly(prob):
+    odds = probability_to_odds(prob)
+    monthly_odds = (1/12.0)*odds
+    adjusted_prob = odds_to_probability(monthly_odds)
+    return adjusted_prob
+
+def adjust_for_relative_risk(rr, prob):
+        # prob to odds
+    odds =  probability_to_odds(prob)
     scaled = odds*rr
     # odds to prob
-    adjusted_prob = scaled / (1+scaled)
+    adjusted_prob = odds_to_probability(scaled)
     return adjusted_prob
 
 class Variable():
@@ -72,10 +85,24 @@ def get_input_variables():
         'RR.mortality.stroke': Variable(1.75),
         'mortality.bcvi.no.therapy': Variable(0.4030),
         'mortality.bcvi.therapy': Variable(0.1660),
-        'mortality.blunt.overall': Variable(0.1610)
+        'mortality.blunt.overall': Variable(0.1610),
         ## hemorrhage? complications?
         
         ## costs?
+        'cost.cta': Variable(708),
+        'cost.blunt.base': Variable(23397),
+        'cost.stroke': Variable(19248),
+        'cost.aspirin': Variable(4),
+    
+        # mortality cost placeholder
+        'cost.mortality.initial': Variable(0.00001),
+
+        # utilites PLACEHOLDER
+
+        'utility.stroke.acute': Variable(0.45), # PLACEHOLDER
+        'utility.stroke.long.term': Variable(0.64),
+        'utility.trauma.acute': Variable(0.55), # PLACEHOLDER
+        'utility.trauma.long.term': Variable(0.85)
 
     }
     return variables

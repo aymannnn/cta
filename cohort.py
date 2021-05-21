@@ -5,7 +5,18 @@ class Cohort():
     def get_counters(self):
         # have a strategy string for printing
         counters = {
-            'ct.scan': 0
+            'ct.scan': 0,
+            'cost.cta': 0,
+            'cost.trauma': 0,
+            
+            'cost.stroke.caught': 0,
+            'cost.stroke.missed': 0,
+            'cost.stroke.baseline': 0,
+            'cost.aspirin': 0,
+
+            'QALY.post.stroke': 0,
+            'QALY.post.trauma': 0
+
         }
         return counters
 
