@@ -5,8 +5,8 @@ import general_functions as gf
 def split_initial_states(cohort, input_variables):
     # initial to true BCVI
     p_i_tbcvi = input_variables['incidence.bcvi.blunt'].val
-    cohort.states = gf.move_state(
-        cohort.states, 
+    cohort = gf.move_state(
+        cohort, 
         'initial', 
         ['true.bcvi', 'false.bcvi'], 
         [p_i_tbcvi, 1-p_i_tbcvi]
@@ -41,13 +41,13 @@ def count_ctas_and_move_states(cohort, input_variables):
     cohort.counters['ct.scan'] += cohort.states['TP']
     cohort.counters['ct.scan'] += cohort.states['FP']
     
-    cohort.counters['cost.cta'] += (
+    cohort.counters['cost.this.cycle'] += (
         cohort.counters['ct.scan']*
         input_variables['cost.cta'].val)
 
     # move states
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         'TP',
         ['detected.bcvi'],
         [1]
@@ -56,20 +56,20 @@ def count_ctas_and_move_states(cohort, input_variables):
     # that's their actual state that matters for this point going forward
     # note that false positive means false positive to GET A CT, and does NOT
     # mean that a CT scan is positive
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         'FP',
         ['no.bcvi'],
         [1]
     )
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         'TN',
         ['no.bcvi'],
         [1]
     )
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         'FN',
         ['missed.bcvi'],
         [1]
@@ -78,16 +78,16 @@ def count_ctas_and_move_states(cohort, input_variables):
 
 def universal_cta(cohort, input_variables):
     assert(cohort.strategy == 'universal')
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         'true.bcvi',
         ['detected.bcvi'],
         [1]
         # probability is 1 because every1 is getting a ct scan and thus
         # everyone is detected
     )
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         'false.bcvi',
         ['no.bcvi'],
         [1]
@@ -95,7 +95,7 @@ def universal_cta(cohort, input_variables):
     # count the CTAs
     cohort.counters['ct.scan'] += cohort.states['detected.bcvi']
     cohort.counters['ct.scan'] += cohort.states['no.bcvi']
-    cohort.counters['cost.cta'] += (
+    cohort.counters['cost.this.cycle'] += (
         cohort.counters['ct.scan']*input_variables['cost.cta'].val)
 
     return cohort
@@ -113,8 +113,8 @@ def screening_test(cohort, input_variables):
     start_state = 'true.bcvi'
     end_states = ['TP', 'FN']
     probs = [sens, 1-sens]
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         start_state,
         end_states,
         probs
@@ -124,8 +124,8 @@ def screening_test(cohort, input_variables):
     start_state = 'false.bcvi'
     end_states = ['FP', 'TN']
     probs = [1-spec, spec]
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         start_state,
         end_states,
         probs
@@ -146,8 +146,9 @@ def run_screen_and_cta(cohort, input_variables):
         cohort = screening_test(cohort, input_variables)
  
     # add in the cost of aspirin management now that we've 
-    cohort.counters['cost.aspirin'] += (
-        input_variables['cost.aspirin'].val * cohort.states['detected.bcvi'] )
+    cohort.counters['cost.this.cycle'] += (
+        input_variables['cost.aspirin'].val * cohort.states['detected.bcvi'])
+
     return cohort
 
 def stroke(cohort, input_variables):
@@ -157,28 +158,30 @@ def stroke(cohort, input_variables):
     end_states = ['stroke.bcvi.caught', 'regular.trauma.fu.bcvi.caught']
     p_stroke_anticoagulated = input_variables['stroke.bcvi.therapy'].val
     probs = [p_stroke_anticoagulated, 1-p_stroke_anticoagulated]
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         start_state,
         end_states,
         probs
     )
 
-    cohort.counters['cost.stroke.caught'] += (
+    cohort.counters['cost.this.cycle'] += (
         cohort.states['stroke.bcvi.caught'] * input_variables['cost.stroke'].val)
+
+
     # starting with missed bcvi
     start_state = 'missed.bcvi'
     end_states = ['stroke.bcvi.missed', 'regular.trauma.fu.bcvi.missed']
     p_stroke = input_variables['stroke.bcvi.no.therapy'].val
     probs = [p_stroke, 1-p_stroke]
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         start_state,
         end_states,
         probs
     )
 
-    cohort.counters['cost.stroke.missed'] += (
+    cohort.counters['cost.this.cycle'] += (
         cohort.states['stroke.bcvi.missed'] * input_variables['cost.stroke'].val)
 
     # starting with baseline risk of stroke, should be close to 1% but
@@ -188,14 +191,14 @@ def stroke(cohort, input_variables):
     end_states = ['stroke.no.bcvi', 'regular.trauma.fu.no.bcvi']
     p_stroke = input_variables['stroke.no.bcvi'].val
     probs = [p_stroke, 1-p_stroke]
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         start_state,
         end_states,
         probs
     )
 
-    cohort.counters['cost.stroke.baseline'] += (
+    cohort.counters['cost.this.cycle'] += (
         cohort.states['stroke.no.bcvi'] * input_variables['cost.stroke'].val)
 
     return cohort
@@ -208,7 +211,7 @@ def initial_mortality(cohort, input_variables):
     ## BCVI patients WITH anticoagulation/antiplatelet/tx
 
     p = input_variables['mortality.bcvi.therapy'].val
-    p_stroke = variables.adjust_for_relative_risk(
+    p_stroke = gf.adjust_for_relative_risk(
         input_variables['RR.mortality.stroke'].val,
         p
     )
@@ -216,8 +219,8 @@ def initial_mortality(cohort, input_variables):
     start_state = 'regular.trauma.fu.bcvi.caught'
     end_states = ['dead.bcvi.caught', 'regular.trauma.fu.bcvi.caught']
     probs = [p, 1-p]
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         start_state,
         end_states,
         probs
@@ -226,8 +229,8 @@ def initial_mortality(cohort, input_variables):
     start_state = 'stroke.bcvi.caught'
     end_states = ['dead.bcvi.caught', 'stroke.bcvi.caught']
     probs = [p_stroke, 1-p_stroke]
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         start_state,
         end_states,
         probs
@@ -236,7 +239,7 @@ def initial_mortality(cohort, input_variables):
     ## BCVI patients WITHOUT anticoagulation
 
     p = input_variables['mortality.bcvi.no.therapy'].val
-    p_stroke = variables.adjust_for_relative_risk(
+    p_stroke = gf.adjust_for_relative_risk(
         input_variables['RR.mortality.stroke'].val,
         p
     )
@@ -244,8 +247,8 @@ def initial_mortality(cohort, input_variables):
     start_state = 'regular.trauma.fu.bcvi.missed'
     end_states = ['dead.bcvi.missed', 'regular.trauma.fu.bcvi.missed']
     probs = [p, 1-p]
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         start_state,
         end_states,
         probs
@@ -254,8 +257,8 @@ def initial_mortality(cohort, input_variables):
     start_state = 'stroke.bcvi.missed'
     end_states = ['dead.bcvi.missed', 'stroke.bcvi.missed']
     probs = [p_stroke, 1-p_stroke]
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         start_state,
         end_states,
         probs
@@ -264,7 +267,7 @@ def initial_mortality(cohort, input_variables):
     ## regular patients, no BCVI
 
     p = input_variables['mortality.blunt.overall'].val
-    p_stroke = variables.adjust_for_relative_risk(
+    p_stroke = gf.adjust_for_relative_risk(
         input_variables['RR.mortality.stroke'].val,
         p
     )
@@ -272,8 +275,8 @@ def initial_mortality(cohort, input_variables):
     start_state = 'regular.trauma.fu.no.bcvi'
     end_states = ['dead.no.bcvi', 'regular.trauma.fu.no.bcvi']
     probs = [p, 1-p]
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         start_state,
         end_states,
         probs
@@ -282,8 +285,8 @@ def initial_mortality(cohort, input_variables):
     start_state = 'stroke.no.bcvi'
     end_states = ['dead.no.bcvi', 'stroke.no.bcvi']
     probs = [p_stroke, 1-p_stroke]
-    cohort.states = gf.move_state(
-        cohort.states,
+    cohort = gf.move_state(
+        cohort,
         start_state,
         end_states,
         probs
@@ -307,25 +310,68 @@ def add_quality_of_life(cohort, input_variables):
     qaly_stroke_all = cycle*qaly_stroke*qaly_trauma
     qaly_trauma_all = cycle*qaly_trauma
 
-    counters['QALY.post.stroke'] += qaly_stroke_all*states['stroke.bcvi.caught']
-    counters['QALY.post.stroke'] += qaly_stroke_all*states['stroke.bcvi.missed']
-    counters['QALY.post.stroke'] += qaly_stroke_all*states['stroke.no.bcvi']
+    counters['qaly.this.cycle'] += qaly_stroke_all*states['stroke.bcvi.caught']
+    counters['qaly.this.cycle'] += qaly_stroke_all*states['stroke.bcvi.missed']
+    counters['qaly.this.cycle'] += qaly_stroke_all*states['stroke.no.bcvi']
     
-    counters['QALY.post.trauma'] += (
+    counters['qaly.this.cycle'] += (
         qaly_trauma_all*states['regular.trauma.fu.bcvi.caught'])
-    counters['QALY.post.trauma'] += (
+    counters['qaly.this.cycle'] += (
         qaly_trauma_all*states['regular.trauma.fu.bcvi.missed'])
-    counters['QALY.post.trauma'] += (
+    counters['qaly.this.cycle'] += (
         qaly_trauma_all*states['regular.trauma.fu.no.bcvi'])
 
     cohort.counters = counters
 
     return cohort
 
+def consolidate_states(cohort):
+
+    stroke_states = [
+        'stroke.bcvi.caught', 'stroke.bcvi.missed', 'stroke.no.bcvi']
+
+    for state in stroke_states:
+        cohort = gf.move_state(
+            cohort,
+            state,
+            ['fu.stroke'],
+            [1.0]
+        )
+
+
+    regular_fu_states = [
+        'regular.trauma.fu.bcvi.caught', 
+        'regular.trauma.fu.bcvi.missed', 
+        'regular.trauma.fu.no.bcvi']
+
+    for state in regular_fu_states:
+        cohort = gf.move_state(
+            cohort,
+            state,
+            ['fu.regular'],
+            [1.0]
+        )
+
+    dead_states = [
+        'dead.bcvi.caught', 'dead.bcvi.missed', 'dead.no.bcvi'
+    ]
+
+    for state in dead_states:
+        cohort = gf.move_state(
+            cohort,
+            state,
+            ['fu.dead'],
+            [1.0]
+        )
+
+    print(cohort.states)
+        
+    return cohort
+
 def run_initial_event(cohort, input_variables):
 
     # everyone has the cost of trauma
-    cohort.counters['cost.trauma'] = 1*input_variables['cost.blunt.base'].val
+    cohort.counters['cost.this.cycle'] = 1*input_variables['cost.blunt.base'].val
 
     # split into true state bcvi or false.bcvi
     cohort = split_initial_states(cohort, input_variables)
@@ -340,5 +386,29 @@ def run_initial_event(cohort, input_variables):
     cohort = add_quality_of_life(cohort, input_variables)
 
     cohort.initial_event_ran = True
+
+    cohort.counters["current.age"] += 1
+
+    cohort.counters['mortality.this.cycle'] = (
+        cohort.states['dead.bcvi.caught']+
+        cohort.states['dead.bcvi.missed']+
+        cohort.states['dead.no.bcvi']
+    )
+
+    # cohort.counters['monthly.mortality'].append(
+    #     cohort.counters['mortality.this.cycle']
+    # )
+
+    # cohort.counters['monthly.cost.total'].append(
+    #     cohort.counters['cost.this.cycle']
+    # )
+
+    # cohort.counters['monthly.qaly.total'].append(
+    #     cohort.counters['qaly.this.cycle']
+    # )
+
+    cohort = consolidate_states(cohort)
+
+    gf.reset_counters(cohort)
 
     return cohort

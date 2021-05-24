@@ -1,24 +1,4 @@
-def probability_to_odds(prob):
-    odds = prob/(1-prob)
-    return odds
-
-def odds_to_probability(odds):
-    prob = odds/(1+odds)
-    return prob
-
-def annual_prob_to_monthly(prob):
-    odds = probability_to_odds(prob)
-    monthly_odds = (1/12.0)*odds
-    adjusted_prob = odds_to_probability(monthly_odds)
-    return adjusted_prob
-
-def adjust_for_relative_risk(rr, prob):
-        # prob to odds
-    odds =  probability_to_odds(prob)
-    scaled = odds*rr
-    # odds to prob
-    adjusted_prob = odds_to_probability(scaled)
-    return adjusted_prob
+import general_functions
 
 class Variable():
     '''
@@ -51,7 +31,10 @@ class Variable():
 def get_input_variables():
     variables = {
         ## starting cohort characteristics
-        'age': Variable(65),
+
+        # NOTE that AGE is in MONTHS
+        'starting.age': Variable(600),
+        'stopping.age': Variable(612),
         'iss': Variable(17),
         'blunt.trauma.usa': Variable(2405000),
         'incidence.bcvi.blunt': Variable(0.076),
@@ -82,7 +65,7 @@ def get_input_variables():
 
         ## mortality with and without thrombotic therapy
         ## relative risk of mortality with stroke
-        'RR.mortality.stroke': Variable(1.75),
+        'RR.mortality.stroke': Variable(1.75), # ideally have one for long-term
         'mortality.bcvi.no.therapy': Variable(0.4030),
         'mortality.bcvi.therapy': Variable(0.1660),
         'mortality.blunt.overall': Variable(0.1610),
@@ -96,6 +79,9 @@ def get_input_variables():
     
         # mortality cost placeholder
         'cost.mortality.initial': Variable(0.00001),
+
+        # long-term
+        'monthly.cost.stroke.long.term': Variable(100),
 
         # utilites PLACEHOLDER
 

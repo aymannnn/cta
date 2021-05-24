@@ -5,14 +5,20 @@ import variables
 import cohort as c
 import run_initial_cycle
 import print_output
+import followup
 
 def run_strategy(s_strat, input_variables):
-    cohort = c.Cohort(s_strat)
+    cohort = c.Cohort(
+        s_strat, input_variables['starting.age'].val)
     cohort = run_initial_cycle.run_initial_event(
         cohort, 
         input_variables)
+    cohort = followup.run_monthly_followup(cohort, input_variables)
     ## have a for month in 12 or whatever and run a function for
     ## the monthly f/u model
+    cohort.counters['final.cost'] = cohort.counters['monthly.cost.total'][-1]
+    cohort.counters['final.qaly'] = cohort.counters['monthly.qaly.total'][-1]
+    
     return cohort
 
 # most likely will add configuration to the setup model here
@@ -33,7 +39,7 @@ def setup_model():
     }
     for key in strategies:
         print('Running strategy:', key)
-        strategies[key] = run_strategy(key, input_variables)    
+        strategies[key] = run_strategy(key, input_variables)  
     print_output.print_base_case(strategies)
 
     return 

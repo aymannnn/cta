@@ -3,7 +3,7 @@ import csv
 
 def print_counters(strategies):
     # strategy will be the row, and column will be the states
-    empty = cohort.Cohort(s_strategy='printing')
+    empty = cohort.Cohort(s_strategy='printing', age=100) #placeholder for age
     empty_counters = empty.counters
     empty_counters['strategy'] = 'placeholder'
     fieldnames = empty_counters.keys()
@@ -19,7 +19,7 @@ def print_counters(strategies):
 
 def print_states(strategies):
     # strategy will be the' row, and column will be the states 
-    empty = cohort.Cohort(s_strategy='printing')
+    empty = cohort.Cohort(s_strategy='printing', age = 100) # placeholder
     empty_states = empty.states
     empty_states['strategy'] = 'placeholder'
     fieldnames = empty_states.keys()

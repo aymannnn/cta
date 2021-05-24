@@ -2,22 +2,29 @@ class Cohort():
     '''
     initial setup, define patient base case scenarios
     '''
-    def get_counters(self):
+    def get_counters(self, age):
         # have a strategy string for printing
         counters = {
             'ct.scan': 0,
-            'cost.cta': 0,
-            'cost.trauma': 0,
-            
-            'cost.stroke.caught': 0,
-            'cost.stroke.missed': 0,
-            'cost.stroke.baseline': 0,
-            'cost.aspirin': 0,
+            'index': 0,
+
+            'cost.this.cycle': 0,
+            'mortality.this.cycle': 0,
+            'qaly.this.cycle': 0,
 
             'QALY.post.stroke': 0,
-            'QALY.post.trauma': 0
+            'QALY.post.trauma': 0,
 
+            'current.age': age,
+
+            'monthly.mortality': [],
+            'monthly.cost.total': [],
+            'monthly.qaly.total': [],
+
+            'final.cost':0,
+            'final.qaly':0
         }
+
         return counters
 
     def get_state_matrix(self):
@@ -60,6 +67,12 @@ class Cohort():
             'dead.bcvi.missed': 0.0,
             'dead.no.bcvi': 0.0,
 
+            ## POST INITIAL CYCLE
+
+            'fu.stroke': 0.0,
+            'fu.regular': 0.0,
+            'fu.dead': 0.0,
+
         }
         return states
 
@@ -77,10 +90,14 @@ class Cohort():
                 return False
             else:
                 val += state_amt
-        return self.close_to_one(val)
+        if self.close_to_one(val):
+            return True
+        else:
+            print('failed check state sum', self.states, val)
+            return False
 
-    def __init__(self, s_strategy):
+    def __init__(self, s_strategy, age):
         self.strategy = s_strategy
-        self.counters = self.get_counters()
+        self.counters = self.get_counters(age)
         self.states = self.get_state_matrix()
         self.initial_event_ran = False
