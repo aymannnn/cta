@@ -21,8 +21,8 @@ class Cohort():
             'monthly.cost.total': [],
             'monthly.qaly.total': [],
 
-            'final.cost':0,
-            'final.qaly':0
+            'final.cost.per.mult':0,
+            'final.qaly.per.':0
         }
 
         return counters

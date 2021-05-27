@@ -90,6 +90,11 @@ def run_monthly_followup(cohort, input_variables):
         cohort.counters['current.age'] < input_variables['stopping.age'].val):
         cohort = update(cohort, input_variables)
         cohort = gf.reset_counters(cohort)
+    cohort.counters['final.cost.per.mult'] = (
+        input_variables['multiplier']*cohort.counters['monthly.cost.total'][-1])
+    cohort.counters['final.qaly.per.mult'] = (
+        input_variables['multiplier']*cohort.counters['monthly.qaly.total'][-1])
+
     return cohort
 
 

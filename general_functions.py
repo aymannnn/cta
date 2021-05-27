@@ -60,12 +60,12 @@ def reset_counters(cohort):
         previous_qaly = cohort.counters['monthly.qaly.total'][index-1]
         previous_cost = cohort.counters['monthly.cost.total'][index-1]
     
-    print('previous mortality, previous qaly, previous cost:', 
-    previous_mortality, previous_qaly, previous_cost)
-    print('current mortality, current qaly, current cost',
-    cohort.counters['mortality.this.cycle'],
-    cohort.counters['cost.this.cycle'],
-    cohort.counters['qaly.this.cycle'])
+    # print('previous mortality, previous qaly, previous cost:', 
+    #       previous_mortality, previous_qaly, previous_cost)
+    # print('current mortality, current qaly, current cost',
+    # cohort.counters['mortality.this.cycle'],
+    # cohort.counters['cost.this.cycle'],
+    # cohort.counters['qaly.this.cycle'])
 
     cohort.counters['monthly.mortality'].append(
         cohort.counters['mortality.this.cycle'] + previous_mortality

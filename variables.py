@@ -31,6 +31,7 @@ class Variable():
 def get_input_variables():
     variables = {
         ## starting cohort characteristics
+        'multiplier': 1000, # to get results by per 1000
 
         # NOTE that AGE is in MONTHS
         'starting.age': Variable(600),
@@ -73,12 +74,14 @@ def get_input_variables():
         
         ## costs?
         'cost.cta': Variable(708),
-        'cost.blunt.base': Variable(23397),
+        # TODO: SHOULD BLUNT BASE TRAUMA COST BE INCLUDED? DOESN'T CHANGE DELTA
+        # 'cost.blunt.base': Variable(23397), 
+        'cost.blunt.base': Variable(0), 
         'cost.stroke': Variable(19248),
         'cost.aspirin': Variable(4),
     
         # mortality cost placeholder
-        'cost.mortality.initial': Variable(0.00001),
+        'cost.mortality.initial': Variable(100),
 
         # long-term
         'monthly.cost.stroke.long.term': Variable(100),

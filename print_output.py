@@ -1,5 +1,7 @@
 import cohort
 import csv
+from efficiency_frontier.efficiency_frontier import calculate_frontier
+
 
 def print_counters(strategies):
     # strategy will be the row, and column will be the states
@@ -33,7 +35,23 @@ def print_states(strategies):
             writer.writerow(states)
     return
 
+def get_frontier_data(strategies):
+    data = []
+    for key in strategies:
+        data.append([
+            key, 
+            strategies[key].counters['final.qaly.per.mult'],
+            strategies[key].counters['final.cost.per.mult']
+            ])
+    return data
+
 def print_base_case(strategies):
     print_counters(strategies)
     print_states(strategies)
+    data_for_frontier = get_frontier_data(strategies)
+    calculate_frontier(
+        data = data_for_frontier,
+        path_to_frontier_output='results/frontier_strategies.csv',
+        path_to_graph='results/graph'
+    )
     return

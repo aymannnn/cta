@@ -136,12 +136,33 @@ def screening_test(cohort, input_variables):
 
     return cohort
 
+def no_screen(cohort, input_variables):
+    assert(cohort.strategy == 'none')
+    cohort = gf.move_state(
+        cohort,
+        'true.bcvi',
+        ['missed.bcvi'],
+        [1]
+        # probability is 1 because nobody is getting a CT scan and therefore
+        # nobody is detected
+    )
+    cohort = gf.move_state(
+        cohort,
+        'false.bcvi',
+        ['no.bcvi'],
+        [1]
+    )
+    # there is no need to count the CTAs when the net cost is 0
+    return cohort
+
 def run_screen_and_cta(cohort, input_variables):
     # will use sens and spec of tests, and then CTA in the next functions
     # universal is different obviously since sens and spec doesn't make as much
     # sense and will break the CTA and move function
     if cohort.strategy == 'universal':
         cohort = universal_cta(cohort, input_variables)
+    elif cohort.strategy == 'none':
+        cohort = no_screen(cohort, input_variables)
     else:
         cohort = screening_test(cohort, input_variables)
  
@@ -167,7 +188,6 @@ def stroke(cohort, input_variables):
 
     cohort.counters['cost.this.cycle'] += (
         cohort.states['stroke.bcvi.caught'] * input_variables['cost.stroke'].val)
-
 
     # starting with missed bcvi
     start_state = 'missed.bcvi'
@@ -363,9 +383,7 @@ def consolidate_states(cohort):
             ['fu.dead'],
             [1.0]
         )
-
-    print(cohort.states)
-        
+    
     return cohort
 
 def run_initial_event(cohort, input_variables):

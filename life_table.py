@@ -118,7 +118,6 @@ def get_monthly_death_probability(age_in_MONTHS):
     index_years = age_in_MONTHS//12
     prob_annual = life_table[index_years]
     prob_monthly = gf.annual_prob_to_monthly(prob_annual) 
-    print(prob_monthly)
     return prob_monthly
 
 
