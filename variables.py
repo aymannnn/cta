@@ -17,11 +17,40 @@ class Variable():
     def get_upper_bound(self):
         return self.upper
 
-    def __init__(
-        self, base, x = None, n = None, distribution = None):
+    def setup_sa(self, iterations):
+        assert self.__lower < self.__upper, [self.__lower, self.__upper]
+        assert self.__base > self.__lower and self.__base < self.__upper
         
-        self.lower = None
-        self.upper = None
+        interval = (self.__upper - self.__lower) / iterations
+        val = self.__lower
+
+        for i in range(iterations):
+            self.values_sa.append(val)
+            val += interval
+        #print(self.__lower, self.__upper, self.values_sa)
+        return
+
+    def print_bounds(self):
+        print(
+            'Bounds are:', 
+            self.__lower, 
+            'to', 
+            self.__upper, 
+            ', with a base case value of',
+            self.__base)
+
+    def __init__(
+        self, 
+        base,
+        lower = None,
+        upper = None,
+        x = None, 
+        n = None, 
+        distribution = None):
+
+        self.__lower = lower
+        self.__upper = upper
+        self.values_sa = []
         self.distribution = None
         self.__base = base
         ## update here if val is not base, i.e. base-case
@@ -29,7 +58,14 @@ class Variable():
         self.val = self.__base
 
 def get_input_variables():
+
     variables = {
+        # some model setup things
+        'run.base.case': True,
+        'run.sensitivity': True,
+        'sa_variable': 'incidence.bcvi.blunt',
+        'sa.iterations': 200,
+
         ## starting cohort characteristics
         'multiplier': 1000, # to get results by per 1000
 
@@ -38,7 +74,11 @@ def get_input_variables():
         'stopping.age': Variable(612),
         'iss': Variable(17),
         'blunt.trauma.usa': Variable(2405000),
-        'incidence.bcvi.blunt': Variable(0.076),
+        'incidence.bcvi.blunt': Variable(
+            0.076,
+            lower = 0.005,
+            upper = 0.10
+            ),
 
         ## screening test characteristics
         ## positive test given true state is sensitivity
@@ -80,20 +120,29 @@ def get_input_variables():
         'cost.stroke': Variable(19248),
         'cost.aspirin': Variable(4),
     
-        # mortality cost placeholder
-        'cost.mortality.initial': Variable(100),
+
+        'cost.mortality.initial': Variable(0), ## TODO: SEE IF UPDATE?
 
         # long-term
-        'monthly.cost.stroke.long.term': Variable(100),
+        'monthly.cost.stroke.long.term': Variable((35089.49/12)),
 
         # utilites PLACEHOLDER
 
-        'utility.stroke.acute': Variable(0.45), # PLACEHOLDER
+        'utility.stroke.acute': Variable(0.073),
         'utility.stroke.long.term': Variable(0.64),
-        'utility.trauma.acute': Variable(0.55), # PLACEHOLDER
+        'utility.trauma.acute': Variable(0.85), # PLACEHOLDER?
         'utility.trauma.long.term': Variable(0.85)
-
     }
+
+        # set up sensitivity analysis here
+    
+    sa_lower =  0.005,
+    sa_upper = 0.01,
+
+    if variables['run.sensitivity'] == True:
+        variables[variables['sa_variable']].setup_sa(
+            variables['sa.iterations']
+        )
     return variables
 
 
