@@ -8,6 +8,10 @@ class Cohort():
             'ct.scan': 0,
             'index': 0,
 
+            'initial.month.stroke': 0.0,
+            'initial.month.mortality': 0.0,
+
+
             'cost.this.cycle': 0,
             'mortality.this.cycle': 0,
             'qaly.this.cycle': 0,

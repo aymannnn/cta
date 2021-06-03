@@ -51,7 +51,7 @@ def print_base_case(strategies_key, strategies):
     data_for_frontier = get_frontier_data(strategies)
     calculate_frontier(
         data = data_for_frontier,
-        path_to_frontier_output='results/frontier_strategies.csv',
+        path_to_frontier_output= 'results/frontier_strategies.csv',
         path_to_graph='results/graph'
     )
     return

@@ -63,7 +63,7 @@ def get_input_variables():
         # some model setup things
         'run.base.case': True,
         'run.sensitivity': True,
-        'sa_variable': 'incidence.bcvi.blunt',
+        'sa_variable': 'stroke.bcvi.therapy',
         'sa.iterations': 200,
 
         ## starting cohort characteristics
@@ -99,7 +99,9 @@ def get_input_variables():
 
         ## stroke with and without thrombotic therapy
         'stroke.bcvi.no.therapy': Variable(0.3360),
-        'stroke.bcvi.therapy': Variable(0.0980),
+        'stroke.bcvi.therapy': Variable(0.0980,
+        lower =0.017,
+        upper=0.3360),
         ## TODO: come back and fix this value with the one that
         ## youssef got
         'stroke.no.bcvi': Variable(0.017), ## black in an email
@@ -108,7 +110,10 @@ def get_input_variables():
         ## relative risk of mortality with stroke
         'RR.mortality.stroke': Variable(1.75), # ideally have one for long-term
         'mortality.bcvi.no.therapy': Variable(0.4030),
-        'mortality.bcvi.therapy': Variable(0.1660),
+        'mortality.bcvi.therapy': Variable(
+            0.1660,
+            lower =0.1610,
+            upper=0.4030),
         'mortality.blunt.overall': Variable(0.1610),
         ## hemorrhage? complications?
         
@@ -143,6 +148,7 @@ def get_input_variables():
         variables[variables['sa_variable']].setup_sa(
             variables['sa.iterations']
         )
+    
     return variables
 
 

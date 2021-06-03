@@ -75,6 +75,8 @@ def setup_model():
             path = 'results/' + sa_variable + '.csv'
             )
 
+    ## reset for base case analysis
+    input_variables = variables.get_input_variables()
     if input_variables['run.base.case']:
         print('Running base case')
         run_single_analysis(

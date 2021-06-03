@@ -358,6 +358,8 @@ def consolidate_states(cohort):
             [1.0]
         )
 
+    cohort.counters['initial.month.stroke'] += cohort.states['fu.stroke']
+
 
     regular_fu_states = [
         'regular.trauma.fu.bcvi.caught', 
@@ -383,7 +385,9 @@ def consolidate_states(cohort):
             ['fu.dead'],
             [1.0]
         )
-    
+
+    cohort.counters['initial.month.mortality'] += cohort.states['fu.dead']
+
     return cohort
 
 def run_initial_event(cohort, input_variables):
