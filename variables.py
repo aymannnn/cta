@@ -1,4 +1,5 @@
 import general_functions
+import numpy as np
 
 class Variable():
     '''
@@ -39,13 +40,33 @@ class Variable():
             ', with a base case value of',
             self.__base)
 
+    def get_random_uniform(self):
+        self.val =  np.random.uniform(self.lower, self.upper)
+    
+    def get_random_beta(self):
+        self.val = np.random.beta(x_beta, n_beta-x_beta)
+    
+    def get_random_gamma(self):
+        self.val = np.random.gamma(self.shape_gamma, self.scale_gamma)
+
+    def generate_random_variables(self, iterations, distribution):
+        if distribution == 'uniform':
+            self.get_random_uniform(self)
+        elif distribution == 'beta':
+            self.get_random_beta(self)
+        elif distribution == 'gamma':
+            self.get_random_gamma(self)
+        
+
     def __init__(
         self, 
         base,
         lower = None,
         upper = None,
-        x = None, 
-        n = None, 
+        x_beta = None, 
+        n_beta = None,
+        shape_gamma = None,
+        scale_gamma = None, 
         distribution = None):
 
         self.__lower = lower
@@ -71,8 +92,8 @@ def get_input_variables():
 
         # NOTE that AGE is in MONTHS
         'starting.age': Variable(600),
-        'stopping.age': Variable(612),
-        'iss': Variable(17),
+        'stopping.age': Variable(612), ## should define as starting+12
+        'iss': Variable(17), # ISS is capped at 75, gamma distribution
         'blunt.trauma.usa': Variable(2405000),
         'incidence.bcvi.blunt': Variable(
             0.076,
