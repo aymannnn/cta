@@ -355,13 +355,14 @@ def get_input_variables():
         ## this is conservative since long-term won't include major stroke
         ## longterm
 
+        # this is an assumption based on 
         'utility.stroke.acute': Variable(
             0.50,
             distribution='beta',
             backcalculate_beta=True,
             name='utility.stroke.acute',
-            mean_beta=0.30,
-            variance_beta=0.30*0.1
+            mean_beta=0.50,
+            variance_beta=0.50*0.1
             ),
 
         'utility.stroke.long.term': Variable(
