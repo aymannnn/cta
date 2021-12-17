@@ -115,7 +115,7 @@ def get_monthly_death_probability(age_in_MONTHS):
     # age in years will be mod 12, so 23 months of age is age 1
     # this will be the index that we use for the list as well
     assert(age_in_MONTHS < (12*100))
-    index_years = age_in_MONTHS//12
+    index_years = int(age_in_MONTHS//12)
     prob_annual = life_table[index_years]
     prob_monthly = gf.annual_prob_to_monthly(prob_annual) 
     return prob_monthly

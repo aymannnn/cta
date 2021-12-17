@@ -86,8 +86,11 @@ def update(cohort, input_variables):
     return cohort
 
 def run_monthly_followup(cohort, input_variables):
+    stopping_age = (
+        input_variables['starting.age'].val+
+        input_variables['months_to_run'])
     while(
-        cohort.counters['current.age'] < input_variables['stopping.age'].val):
+        cohort.counters['current.age'] < stopping_age):
         cohort = update(cohort, input_variables)
         cohort = gf.reset_counters(cohort)
     cohort.counters['final.cost.per.mult'] = (
