@@ -6,12 +6,17 @@ def update_cost_qaly(cohort, input_variables):
     # QALY
     
     cycle = 1/12
+    month_of_discount = (
+        cohort.counters['current.age'] - input_variables['starting.age'].val)
+    annual_discount = input_variables['discount_rate']
+    monthly_discount = annual_discount*cycle
+    discount = (1-monthly_discount)**month_of_discount
 
     # lt = longterm
     cost_stroke_lt = input_variables['monthly.cost.stroke.long.term'].val
     
     cohort.counters['cost.this.cycle'] += (
-        cost_stroke_lt*cohort.states['fu.stroke'])
+        discount*cost_stroke_lt*cohort.states['fu.stroke'])
 
     qaly_trauma = input_variables['utility.trauma.long.term'].val
     qaly_stroke = input_variables['utility.stroke.long.term'].val
@@ -20,9 +25,9 @@ def update_cost_qaly(cohort, input_variables):
     qaly_trauma_all = cycle*qaly_trauma
 
     cohort.counters['qaly.this.cycle'] += (
-        qaly_stroke_all*cohort.states['fu.stroke'])
+        discount*qaly_stroke_all*cohort.states['fu.stroke'])
     cohort.counters['qaly.this.cycle'] += (
-        qaly_trauma_all*cohort.states['fu.regular'])
+        discount*qaly_trauma_all*cohort.states['fu.regular'])
 
     
     # print('QALY this cycle:    ', cohort.counters['qaly.this.cycle'])

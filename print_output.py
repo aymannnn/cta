@@ -95,8 +95,8 @@ def get_sa_header(strategies_key, psa = False):
     if psa == True:
         # dividing up 200,000 into increments of 10,000
         # sorry for magic numbers
-        for i in range(1, 21):
-            threshold = i*10000
+        for i in range(1, 201):
+            threshold = i*1000
             threshold_string = str(threshold)
             header.append('WTP threshold: ' + threshold_string)
     else:
@@ -107,14 +107,14 @@ def print_single_sa_run(strategies_key, strategies, val = None, psa = False):
     data = get_frontier_data(strategies)
     if psa == True:
         optimal = []
-        for i in range(1, 21):
+        for i in range(1, 201):
             original_data_copy = copy.deepcopy(data)
             optimal_at_wtp = calculate_frontier(
                 data = original_data_copy, 
                 print_frontier_strategies=False,
                 print_graph=False,
                 get_optimal=True,
-                threshold=i*10000
+                threshold=i*1000
             )
             optimal.append(optimal_at_wtp)
     else: 

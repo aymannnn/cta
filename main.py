@@ -89,8 +89,6 @@ def setup_model():
             path = 'results/' + 'PSA' + '.csv'
             )
 
-
-
     if input_variables['run.sensitivity'] == True:
         ## adding in a setting to do the sensitivity analysis
         # reset 

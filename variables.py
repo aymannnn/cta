@@ -162,12 +162,13 @@ def get_input_variables():
         # some model setup things
         'run.base.case': True,
         'run.sensitivity': False,
-        'run.psa': True,
-        'sa_variable': 'incidence.bcvi.blunt',
+        'run.psa': False,
+        'sa_variable': 'OR.stroke.bcvi.therapy',
         'sa.iterations': 200,
         'psa.iterations': 10000,
         'current.psa.iteration': None,
-        'months_to_run': 60, # stopping age defined as starting + months
+        'months_to_run': 12, # stopping age defined as starting + months
+        'discount_rate': 0.03, # 3% discount rate standard
 
         ## starting cohort characteristics
         'multiplier': 1000, # to get results by per 1000
@@ -260,14 +261,27 @@ def get_input_variables():
             x_beta=79
             ),
 
-        'stroke.bcvi.therapy': Variable(
-            0.0980,
-            lower=0.017,
-            upper=0.3360,
-            distribution='beta',
-            x_beta=70,
-            n_beta=713
+        # update 5/30/2022, change to odds ratio instead of flat out
+        # just having the percentage of stroke bcvi therapy
+
+        'OR.stroke.bcvi.therapy': Variable(
+            0.20,
+            lower=0.01,
+            upper=0.90,
+            distribution='lognormal',
+            lognormal_median=0.20,
+            lognormal_se=np.log(0.65/0.20)/1.96
             ),
+    
+
+        # 'stroke.bcvi.therapy': Variable(
+        #     0.0980,
+        #     lower=0.017,
+        #     upper=0.3360,
+        #     distribution='beta',
+        #     x_beta=70,
+        #     n_beta=713
+        #     ),
 
         'stroke.no.bcvi': Variable(
             0.011,
@@ -304,10 +318,10 @@ def get_input_variables():
             n_beta=253),
 
         'mortality.blunt.overall': Variable(
-            0.1610,
+            0.055,
             distribution='beta',
-            x_beta=1639,
-            n_beta=10183),
+            x_beta=40429,
+            n_beta=(40429+694044)),
 
         ## hemorrhage? complications? TODO
         

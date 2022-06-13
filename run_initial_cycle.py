@@ -177,7 +177,19 @@ def stroke(cohort, input_variables):
     # starting with a detected BCVI
     start_state = 'detected.bcvi'
     end_states = ['stroke.bcvi.caught', 'regular.trauma.fu.bcvi.caught']
-    p_stroke_anticoagulated = input_variables['stroke.bcvi.therapy'].val
+    
+    # 5/30/22: converted to odds ratio instead, way easier in manuscript
+    # p_stroke_anticoagulated = input_variables['stroke.bcvi.therapy'].val
+    
+    rr_stroke_anticoagulated = gf.odds_ratio_to_relative_risk(
+        input_variables['OR.stroke.bcvi.therapy'].val,
+        input_variables['stroke.bcvi.no.therapy'].val # underlying prevalence
+    )
+
+    p_stroke_anticoagulated = gf.adjust_for_relative_risk(
+        rr_stroke_anticoagulated, input_variables['stroke.bcvi.no.therapy'].val
+    )
+
     probs = [p_stroke_anticoagulated, 1-p_stroke_anticoagulated]
     cohort = gf.move_state(
         cohort,

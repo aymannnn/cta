@@ -39,6 +39,18 @@ def annual_prob_to_monthly(prob):
     adjusted_prob = odds_to_probability(monthly_odds)
     return adjusted_prob
 
+def odds_ratio_to_relative_risk(odds_ratio, pref):
+    '''
+    Convert an odds ratio to relative risk so that you can use to adjust
+    a probability.
+
+    To convert, need a prevalence of the reference group, which is 
+    pref in the main function.
+    '''
+    rr = odds_ratio/((1-pref) + (pref*odds_ratio))
+
+    return rr
+
 def adjust_for_relative_risk(rr, prob):
         # prob to odds
     odds =  probability_to_odds(prob)
